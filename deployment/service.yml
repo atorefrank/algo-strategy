@@ -1,0 +1,20 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: trading-service
+  labels: 
+    name: trading-service
+    app: campeao
+spec:
+  type: LoadBalancer
+  selector:
+    app: campeao
+    tier: backend
+    name: trading-service
+  ports:
+  - name: trading
+    targetPort: 80
+    port: 80
+    # nodePort: 32001
+    # protocol: TCP

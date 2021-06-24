@@ -1,0 +1,117 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: trading-service
+  labels: 
+    name: trading-service
+    app: campeao
+spec:
+  type: LoadBalancer
+  selector:
+    app: campeao
+    tier: backend
+    name: trading-service
+  ports:
+  - name: trading
+    targetPort: 80
+    port: 80
+    # nodePort: 32001
+    # protocol: TCP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels: 
+    name: trading-service
+    app: campeao
+  name: trading-service
+  # these labels can be applied automatically
+  # from the labels in the pod template if not set
+  # labels:
+  #   app: guestbook
+  #   tier: frontend
+spec:
+  # this replicas value is default
+  # modify it according to your case
+  # replicas: 2
+  # selector can be applied automatically
+  # from the labels in the pod template if not set
+  selector:
+    matchLabels:
+      app: campeao
+      tier: backend
+  template:
+    metadata:
+      labels:
+        name: trading-service
+        app: campeao
+        tier: backend
+    spec:
+      containers:
+      - name: trading-service
+        image: gcr.io/crypto-data-304103/trading:latest
+        command: ["python", "technical_analysis.py"]
+        # imagePullPolicy: Always
+      # resources:
+      #   requests:
+      #     cpu: 100m
+      #     memory: 100Mi
+      # env:
+      # - name: GET_HOSTS_FROM
+      #   value: dns
+        # If your cluster config does not include a dns service, then to
+        # instead access environment variables to find service host
+        # info, comment out the 'value: dns' line above, and uncomment the
+        # line below.
+        # value: env
+        ports:
+        - name: trading-service
+          containerPort: 80
+        # readinessProbe:
+        #   httpGet:
+        #     path: /auth/apps/
+        #     port: 7500
+        #   initialDelaySeconds: 15
+        #   timeoutSeconds: 5
+        #   periodSeconds: 15
+        # livenessProbe:
+        #   httpGet:
+        #     path: /auth/apps/
+        #     port: 7500
+        #   initialDelaySeconds: 15
+        #   timeoutSeconds: 5
+        #   periodSeconds: 15
+        # env:
+        #   - name: DB_USER
+        #     valueFrom:
+        #       secretKeyRef:
+        #         name: acloud-db-credentials
+        #         key: username
+        #   - name: DB_PASSWORD
+        #     valueFrom:
+        #       secretKeyRef:
+        #         name: acloud-db-credentials
+        #         key: password
+        #   - name: DB_NAME
+        #     valueFrom:
+        #       secretKeyRef:
+        #         name: acloud-db-credentials
+        #         key: name
+        #   - name: DB_HOST
+        #     valueFrom:
+        #       secretKeyRef:
+        #         name: acloud-db-credentials
+        #         key: host
+      - name: mongo
+        image: gcr.io/crypto-data-304103/mongo:latest
+        # imagePullPolicy: Always
+        ports:
+        - name: mongo
+          containerPort: 27017
+        # env:
+        # - name: MONGO_INITDB_ROOT_USERNAME
+        #   value: ""
+        # - name: MONGO_INITDB_ROOT_PASSWORD
+        #   value: ""
